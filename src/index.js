@@ -10,19 +10,69 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const {username} = request.headers;
+
+  const user = users.find(arrayItem => arrayItem.username === username);
+
+  if (!user) {
+    return response.status(404);
+  }
+
+  request.user = user;
+
+  return next();
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const {user} = request;
+
+  if (user.pro || user.todos.length < 10) {
+    return next();
+  }
+
+  return response.status(403).json({
+      error: "Cannot create more todos"
+  })
+
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const {username} = request.headers;
+  const {id} = request.params;
+  
+  const user = users.find(arrayItem => arrayItem.username === username);
+  if (!user) {
+    return response.status(404);
+  }
+
+  if (!validate(id)) {
+    return response.status(400);
+  }
+
+  const todo = user.todos.find(arrayItem => arrayItem.id === id);
+  if (!todo) {
+    return response.status(404);
+  }
+
+
+  request.user = user;
+  request.todo = todo;
+
+  return next();
 }
 
 function findUserById(request, response, next) {
-  // Complete aqui
+  const {id} = request.params;
+
+  const user = users.find(arrayItem => arrayItem.id === id);
+
+  if (!user) {
+    return response.status(404);
+  }
+
+  request.user = user;
+
+  return next();
 }
 
 app.post('/users', (request, response) => {
